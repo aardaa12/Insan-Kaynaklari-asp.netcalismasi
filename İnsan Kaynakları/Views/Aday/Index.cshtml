@@ -1,17 +1,87 @@
-﻿@{
+﻿@model İnsan_Kaynakları.Models.PaginatedList<İnsan_Kaynakları.Models.Aday>
+
+@{
+    ViewData["Title"] = "Aday Profilleri";
 }
-<h1>Aday Profilleri</h1>
 
-<div class="candidate-profile">
-    <h3>@ViewBag.AdayAd1</h3>
-    <p><strong>Email:</strong> @ViewBag.AdayEmail1</p>
-    <p><strong>Başvurulan Pozisyon:</strong> @ViewBag.AdayPozisyon1</p>
-    <hr />
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Aday Profilleri</h1>
+    <div>
+        <span class="badge bg-primary">Toplam: @Model.TotalItems aday</span>
+        <span class="badge bg-secondary">Sayfa: @Model.PageIndex / @Model.TotalPages</span>
+    </div>
 </div>
 
-<div class="candidate-profile">
-    <h3>@ViewBag.AdayAd2</h3>
-    <p><strong>Email:</strong> @ViewBag.AdayEmail2</p>
-    <p><strong>Başvurulan Pozisyon:</strong> @ViewBag.AdayPozisyon2</p>
-    <hr />
+<div class="row">
+    @foreach (var candidate in Model.Items)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="@candidate.Fotourl" class="rounded-circle me-3" width="60" height="60" alt="@candidate.Ad">
+                        <div>
+                            <h5 class="card-title mb-1">@candidate.Ad</h5>
+                            <span class="badge bg-secondary">@candidate.Statü</span>
+                        </div>
+                    </div>
+                    <p class="card-text">
+                        <strong>Pozisyon:</strong> @candidate.Pozisyon<br>
+                        <strong>Deneyim:</strong> @candidate.Deneyim yıl<br>
+                        <strong>Eğitim:</strong> @candidate.Eğitim<br>
+                        <strong>Başvuru:</strong> @candidate.UygulamaZamanı.ToString("dd.MM.yyyy")
+                    </p>
+                    <div class="mb-3">
+                        <small class="text-muted">Yetenekler:</small><br>
+                        <small>@candidate.Yetenek</small>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="@Url.Action("Detaylar", "Aday", new { id = candidate.Id })" class="btn btn-primary btn-sm">Detayları Gör</a>
+                    <a href="mailto:@candidate.Mail" class="btn btn-outline-secondary btn-sm">Email Gönder</a>
+                </div>
+            </div>
+        </div>
+    }
 </div>
+
+<!-- Pagination Controls -->
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        <!-- Previous Button -->
+        @if (Model.HasPreviousPage)
+        {
+            <li class="page-item">
+                <a class="page-link" href="@Url.Action("Index", new { page = Model.PageIndex - 1 })">Önceki</a>
+            </li>
+        }
+        else
+        {
+            <li class="page-item disabled">
+                <span class="page-link">Önceki</span>
+            </li>
+        }
+
+        <!-- Page Numbers -->
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+            </li>
+        }
+
+        <!-- Next Button -->
+        @if (Model.HasNextPage)
+        {
+            <li class="page-item">
+                <a class="page-link" href="@Url.Action("Index", new { page = Model.PageIndex + 1 })">Sonraki</a>
+            </li>
+        }
+        else
+        {
+            <li class="page-item disabled">
+                <span class="page-link">Sonraki</span>
+            </li>
+        }
+    </ul>
+</nav>

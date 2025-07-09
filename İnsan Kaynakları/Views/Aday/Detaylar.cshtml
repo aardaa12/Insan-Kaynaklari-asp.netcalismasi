@@ -1,0 +1,105 @@
+﻿@model İnsan_Kaynakları.Models.Aday
+@{
+    ViewData["Title"] = "Adayı Sil";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Adayı Sil
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-warning me-2"></i>
+                        <strong>Dikkat!</strong> Bu işlem geri alınamaz. Aday kaydı kalıcı olarak silinecektir.
+                    </div>
+
+                    <!-- Candidate Information -->
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            <img src="@Model.Fotourl" class="rounded-circle img-fluid mb-3"
+                                 style="width: 120px; height: 120px; object-fit: cover;"
+                                 alt="@Model.Ad">
+                        </div>
+                        <div class="col-md-9">
+                            <h5 class="text-danger mb-3">Silinecek Aday Bilgileri:</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Ad Soyad:</strong></td>
+                                    <td>@Model.Ad</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Email:</strong></td>
+                                    <td>@Model.Mail</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Pozisyon:</strong></td>
+                                    <td>@Model.Pozisyon</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Telefon:</strong></td>
+                                    <td>@Model.Numara</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Deneyim:</strong></td>
+                                    <td>@Model.Deneyim yıl</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Statü:</strong></td>
+                                    <td>
+                                        <span class="badge bg-secondary">@Model.Statü</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Başvuru Tarihi:</strong></td>
+                                    <td>@Model.UygulamaZamanı.ToString("dd.MM.yyyy HH:mm")</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            İptal Et
+                        </a>
+                        <div>
+                            <a href="@Url.Action("Detaylar", new { id = Model.Id })"
+                               class="btn btn-info me-2">
+                                <i class="fas fa-eye me-1"></i>
+                                Detayları Görüntüle
+                            </a>
+                            <form method="post" class="d-inline" id="deleteForm">
+                                <input type="hidden" name="id" value="@Model.Id" />
+                                <button type="submit" class="btn btn-danger" id="confirmDelete">
+                                    <i class="fas fa-trash me-1"></i>
+                                    Evet, Sil
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add JavaScript confirmation -->
+<script>
+    document.getElementById('confirmDelete').addEventListener('click', function(e) {
+        e.preventDefault();
+
+        if (confirm('Bu adayı silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz!')) {
+            document.getElementById('deleteForm').submit();
+        }
+    });
+</script>
+
+<!-- Add Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
