@@ -1,68 +1,145 @@
 ﻿@model İnsan_Kaynakları.Models.Aday
-
 @{
     ViewData["Title"] = "Yeni Aday Ekle";
 }
 
-<h1>Yeni Aday Ekle</h1>
-
-<div class="row">
+<div class="row justify-content-center">
     <div class="col-md-8">
-        <form asp-action="Create" method="post">
-            <div class="card">
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label asp-for="Ad" class="form-label">Ad Soyad</label>
-                        <input asp-for="Ad" class="form-control" required />
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Mail" class="form-label">Email</label>
-                        <input asp-for="Mail" type="email" class="form-control" required />
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Numara" class="form-label">Telefon</label>
-                        <input asp-for="Numara" class="form-control" required />
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Pozisyon" class="form-label">Başvurulan Pozisyon</label>
-                        <input asp-for="Pozisyon" class="form-control" required />
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Deneyim" class="form-label">Deneyim (Yıl)</label>
-                        <input asp-for="Deneyim" type="number" class="form-control" min="0" required />
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Eğitim" class="form-label">Eğitim</label>
-                        <input asp-for="Eğitim" class="form-control" required />
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Yetenek" class="form-label">Yetenekler</label>
-                        <textarea asp-for="Yetenek" class="form-control" rows="3" required></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Statü" class="form-label">Durum</label>
-                        <select asp-for="Statü" class="form-select" required>
-                            <option value="">Seçiniz...</option>
-                            <option value="Yeni Başvuru">Yeni Başvuru</option>
-                            <option value="Değerlendiriliyor">Değerlendiriliyor</option>
-                            <option value="Mülakata Çağrıldı">Mülakata Çağrıldı</option>
-                            <option value="İşe Alındı">İşe Alındı</option>
-                            <option value="Reddedildi">Reddedildi</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-success">Kaydet</button>
-                    <a href="@Url.Action("Index")" class="btn btn-secondary">İptal</a>
-                </div>
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Yeni Aday Ekle
+                </h4>
             </div>
-        </form>
+            <div class="card-body">
+                <form asp-action="Oluştur" method="post">
+                    <div class="row">
+                        <!-- Left Column -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Ad" class="form-label">
+                                    <i class="fas fa-user me-1"></i>
+                                    Ad Soyad *
+                                </label>
+                                <input asp-for="Ad" class="form-control" placeholder="Örn: Ahmet Yılmaz" required />
+                                <span asp-validation-for="Ad" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Mail" class="form-label">
+                                    <i class="fas fa-envelope me-1"></i>
+                                    Email *
+                                </label>
+                                <input asp-for="Mail" type="email" class="form-control" placeholder="ornek@email.com" required />
+                                <span asp-validation-for="Mail" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Numara" class="form-label">
+                                    <i class="fas fa-phone me-1"></i>
+                                    Telefon Numarası *
+                                </label>
+                                <input asp-for="Numara" class="form-control" placeholder="+90 532 123 45 67" required />
+                                <span asp-validation-for="Numara" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Pozisyon" class="form-label">
+                                    <i class="fas fa-briefcase me-1"></i>
+                                    Başvurulan Pozisyon *
+                                </label>
+                                <input asp-for="Pozisyon" class="form-control" placeholder="Örn: Yazılım Mühendisi" required />
+                                <span asp-validation-for="Pozisyon" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Deneyim" class="form-label">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Deneyim (Yıl) *
+                                </label>
+                                <input asp-for="Deneyim" type="number" class="form-control" min="0" max="50" placeholder="Örn: 3" required />
+                                <span asp-validation-for="Deneyim" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Eğitim" class="form-label">
+                                    <i class="fas fa-graduation-cap me-1"></i>
+                                    Eğitim Durumu *
+                                </label>
+                                <select asp-for="Eğitim" class="form-select" required>
+                                    <option value="">Seçiniz...</option>
+                                    <option value="Lise">Lise</option>
+                                    <option value="Ön Lisans">Ön Lisans</option>
+                                    <option value="Lisans">Lisans</option>
+                                    <option value="Yüksek Lisans">Yüksek Lisans</option>
+                                    <option value="Doktora">Doktora</option>
+                                </select>
+                                <span asp-validation-for="Eğitim" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Statü" class="form-label">
+                                    <i class="fas fa-flag me-1"></i>
+                                    Başlangıç Durumu
+                                </label>
+                                <select asp-for="Statü" class="form-select">
+                                    <option value="Yeni Başvuru" selected>Yeni Başvuru</option>
+                                    <option value="Değerlendiriliyor">Değerlendiriliyor</option>
+                                    <option value="Mülakata Çağrıldı">Mülakata Çağrıldı</option>
+                                    <option value="İşe Alındı">İşe Alındı</option>
+                                    <option value="Reddedildi">Reddedildi</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Full Width Field -->
+                    <div class="mb-4">
+                        <label asp-for="Yetenek" class="form-label">
+                            <i class="fas fa-tools me-1"></i>
+                            Yetenekler ve Beceriler *
+                        </label>
+                        <textarea asp-for="Yetenek" class="form-control" rows="4"
+                                  placeholder="Örn: C#, ASP.NET, SQL Server, JavaScript, Problem Çözme..."
+                                  required></textarea>
+                        <div class="form-text">Virgül ile ayırarak yazınız</div>
+                        <span asp-validation-for="Yetenek" class="text-danger"></span>
+                    </div>
+
+                    <!-- Info Alert -->
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Bilgi:</strong> Fotoğraf ve başvuru tarihi otomatik olarak eklenecektir.
+                    </div>
+
+                    <!-- Buttons inside form -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            İptal
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-1"></i>
+                            Adayı Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- Fix the form tag -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add form id to the form element
+        const form = document.querySelector('form[asp-action="Oluştur"]');
+        if (form) {
+            form.id = 'OluşturForm';
+        }
+    });
+</script>

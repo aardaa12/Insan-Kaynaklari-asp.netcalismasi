@@ -1,0 +1,178 @@
+﻿@model IEnumerable<İnsan_Kaynakları.Models.Başvuru>
+
+@if (Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Aday</th>
+                    <th>İş İlanı</th>
+                    <th>Başvuru Tarihi</th>
+                    <th>Durum</th>
+                    <th>Puan</th>
+                    <th>Mülakat</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var başvuru in Model)
+                {
+                    <tr>
+                        <!-- Candidate -->
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="@başvuru.Aday?.Fotourl" class="rounded-circle me-2" width="35" height="35" alt="@başvuru.Aday?.Ad">
+                                <div>
+                                    <strong>@başvuru.Aday?.Ad</strong><br>
+                                    <small class="text-muted">@başvuru.Aday?.Pozisyon</small>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Job -->
+                        <td>
+                            <div>
+                                <strong>@başvuru.İş?.Başlık</strong><br>
+                                <small class="text-muted">@başvuru.İş?.Şirket</small>
+                            </div>
+                        </td>
+
+                        <!-- Application Date -->
+                        <td>
+                            <span>@başvuru.BaşvuruTarihi.ToString("dd.MM.yyyy")</span><br>
+                            <small class="text-muted">@başvuru.BaşvuruTarihi.ToString("HH:mm")</small>
+                            @{
+                                var daysAgo = (DateTime.Now - başvuru.BaşvuruTarihi).Days;
+                            }
+                            @if (daysAgo == 0)
+                            {
+                                <br>
+                    
+                                <span class="badge bg-success">Bugün</span>
+                            }
+                            else if (daysAgo == 1)
+                            {
+                                <br>
+                    
+                                <span class="badge bg-info">Dün</span>
+                            }
+                            else if (daysAgo <= 7)
+                            {
+                                <br>
+                    
+                                <span class="badge bg-warning">@daysAgo gün önce</span>
+                            }
+                        </td>
+
+                        <!-- Status -->
+                        <td>
+                            @{
+                                string statusBadge = başvuru.Durum switch
+                                {
+                                    "Yeni Başvuru" => "bg-info",
+                                    "Değerlendiriliyor" => "bg-warning",
+                                    "Mülakata Çağrıldı" => "bg-secondary",
+                                    "Kabul Edildi" => "bg-success",
+                                    "Reddedildi" => "bg-danger",
+                                    _ => "bg-secondary"
+                                };
+                            }
+                            <span class="badge @statusBadge">@başvuru.Durum</span>
+                        </td>
+
+                        <!-- Score -->
+                        <td>
+                            @if (başvuru.Puan > 0)
+                            {
+                                <div class="d-flex align-items-center">
+                                    <span class="me-1">@başvuru.Puan/5</span>
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="fas fa-star @(i <= başvuru.Puan ? "text-warning" : "text-muted") small"></i>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+
+                        <!-- Interview -->
+                        <td>
+                            @if (başvuru.MülakatTarihi.HasValue)
+                            {
+                                var interviewDate = başvuru.MülakatTarihi.Value;
+                                var daysUntil = (interviewDate - DateTime.Now).Days;
+
+                                <span>@interviewDate.ToString("dd.MM.yyyy")</span>
+                    
+                                <br>
+                                <small class="text-muted">@interviewDate.ToString("HH:mm")</small>
+
+                                @if (daysUntil == 0)
+                                {
+                                    <br>
+                    
+                                    <span class="badge bg-danger">Bugün</span>
+                                }
+                                else if (daysUntil == 1)
+                                {
+                                    <br>
+                    
+                                    <span class="badge bg-warning">Yarın</span>
+                                }
+                                else if (daysUntil > 0 && daysUntil <= 7)
+                                {
+                                    <br>
+                    
+                                    <span class="badge bg-info">@daysUntil gün sonra</span>
+                                }
+                                else if (daysUntil < 0)
+                                {
+                                    <br>
+                    
+                                    <span class="badge bg-secondary">Geçmiş</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">Planlanmamış</span>
+                            }
+                        </td>
+
+                        <!-- Actions -->
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="@Url.Action("Detaylar", "Aday", new { id = başvuru.AdayId })"
+                                   class="btn btn-outline-primary" title="Aday Profili">
+                                    <i class="fas fa-user"></i>
+                                </a>
+                                <a href="@Url.Action("İşDetay", new { id = başvuru.İşId })"
+                                   class="btn btn-outline-secondary" title="İş Detayları">
+                                    <i class="fas fa-briefcase"></i>
+                                </a>
+                                <a href="@Url.Action("İşBaşvuruları", new { id = başvuru.İşId })"
+                                   class="btn btn-outline-info" title="İş Başvuruları">
+                                    <i class="fas fa-list"></i>
+                                </a>
+                                <a href="mailto:@başvuru.Aday?.Mail"
+                                   class="btn btn-outline-success" title="Email Gönder">
+                                    <i class="fas fa-envelope"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="text-center py-4">
+        <i class="fas fa-search fa-2x text-muted mb-2"></i>
+        <p class="text-muted">Bu kategoride başvuru bulunmuyor.</p>
+    </div>
+}

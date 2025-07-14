@@ -1,18 +1,195 @@
-﻿@{
+﻿@model List<İnsan_Kaynakları.Models.İş>
+@{
+    ViewData["Title"] = "İş İlanları";
 }
 
-<h1>İŞ LİSTESİ</h1>
-
-<div class="iş-listeleme">
-    <h3>@ViewBag.Isbaslık1</h3>
-    <p><strong>Şirket:</strong> @ViewBag.Sirket1</p>
-    <p><strong>Açıklama:</strong> @ViewBag.Isdetay1</p>
-    <hr />
+<!-- Page Header with Statistics -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="fas fa-briefcase me-2"></i>
+        İş İlanları
+    </h1>
+    <div class="d-flex flex-wrap gap-2">
+        <span class="badge bg-primary fs-6">@Model.Count(i => i.Durum == "Aktif") Aktif İlan</span>
+        <a href="@Url.Action("BaşvuruPaneli")" class="btn btn-info btn-sm">
+            <i class="fas fa-chart-line me-1"></i>
+            Başvuru Paneli
+        </a>
+        <a href="@Url.Action("İlanOluştur")" class="btn btn-success btn-sm">
+            <i class="fas fa-plus me-1"></i>
+            Yeni İlan Ekle
+        </a>
+    </div>
 </div>
 
-<div class="iş-listeleme">
-    <h3>@ViewBag.Isbaslık2</h3>
-    <p><strong>Şirket:</strong> @ViewBag.Sirket2</p>
-    <p><strong>Açıklama:</strong> @ViewBag.Isdetay2</p>
-    <hr />
+<!-- Job Cards -->
+<div class="row">
+    @foreach (var iş in Model)
+    {
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <!-- Card Header -->
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="card-title mb-1">@iş.Başlık</h5>
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-building me-1"></i>
+                                @iş.Şirket
+                            </p>
+                        </div>
+                        @{
+                            string statusBadge = iş.Durum switch
+                            {
+                                "Aktif" => "bg-success",
+                                "Kapalı" => "bg-danger",
+                                "Taslak" => "bg-warning",
+                                _ => "bg-secondary"
+                            };
+                        }
+                        <span class="badge @statusBadge">@iş.Durum</span>
+                    </div>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body">
+                    <!-- Job Info -->
+                    <div class="job-info mb-3">
+                        <p class="card-text mb-2">
+                            <i class="fas fa-map-marker-alt text-muted me-1"></i>
+                            <strong>Konum:</strong> @iş.Konum
+                        </p>
+                        <p class="card-text mb-2">
+                            <i class="fas fa-money-bill-wave text-muted me-1"></i>
+                            <strong>Maaş:</strong> @iş.MaaşAralığı
+                        </p>
+                        <p class="card-text mb-2">
+                            <i class="fas fa-clock text-muted me-1"></i>
+                            <strong>Deneyim:</strong> @iş.GerekenDeneyim+ yıl
+                        </p>
+                        <p class="card-text mb-3">
+                            <i class="fas fa-user-tie text-muted me-1"></i>
+                            <strong>Tür:</strong> @iş.ÇalışmaTipi
+                        </p>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="description mb-3">
+                        <p class="card-text">
+                            @(iş.Açıklama.Length > 100 ? iş.Açıklama.Substring(0, 100) + "..." : iş.Açıklama)
+                        </p>
+                    </div>
+
+                    <!-- Required Skills -->
+                    <div class="skills mb-3">
+                        <small class="text-muted">
+                            <i class="fas fa-tools me-1"></i>
+                            Aranan Yetenekler:
+                        </small><br>
+                        @if (iş.ArananYetenekler.Any())
+                        {
+                            @foreach (var skill in iş.ArananYetenekler.Take(3))
+                            {
+                                <span class="badge bg-light text-dark me-1 mb-1">@skill</span>
+                            }
+                            @if (iş.ArananYetenekler.Count > 3)
+                            {
+                                <span class="badge bg-secondary">+@(iş.ArananYetenekler.Count - 3) diğer</span>
+                            }
+                        }
+                    </div>
+
+                    <!-- Application Info -->
+                    <div class="application-info">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            İlan Tarihi: @iş.İlanTarihi.ToString("dd.MM.yyyy")
+                        </small><br>
+                        <small class="text-muted">
+                            <i class="fas fa-calendar-times me-1"></i>
+                            Son Başvuru: @iş.SonBaşvuruTarihi.ToString("dd.MM.yyyy")
+                        </small>
+                        @{
+                            var daysLeft = (iş.SonBaşvuruTarihi - DateTime.Now).Days;
+                        }
+                        @if (daysLeft > 0)
+                        {
+                            <br>
+                    
+                            <small class="text-warning">
+                                <i class="fas fa-hourglass-half me-1"></i>
+                                @daysLeft gün kaldı
+                            </small>
+                        }
+                        else if (daysLeft == 0)
+                        {
+                            <br>
+                    
+                            <small class="text-danger">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                Son gün!
+                            </small>
+                        }
+                        else
+                        {
+                            <br>
+                    
+                            <small class="text-danger">
+                                <i class="fas fa-times-circle me-1"></i>
+                                Süre doldu
+                            </small>
+                        }
+                    </div>
+                </div>
+
+                <!-- Card Footer -->
+                <div class="card-footer bg-transparent">
+                    <div class="row g-1">
+                        <div class="col-6">
+                            <a href="@Url.Action("İşDetay", new { id = iş.Id })"
+                               class="btn btn-primary btn-sm w-100">
+                                <i class="fas fa-eye me-1"></i>
+                                Detaylar
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="@Url.Action("EşleşenAdaylar", new { id = iş.Id })"
+                               class="btn btn-info btn-sm w-100">
+                                <i class="fas fa-users me-1"></i>
+                                Adaylar
+                            </a>
+                        </div>
+                        <div class="col-6 mt-1">
+                            <a href="@Url.Action("Düzenle", new { id = iş.Id })"
+                               class="btn btn-warning btn-sm w-100">
+                                <i class="fas fa-edit me-1"></i>
+                                Düzenle
+                            </a>
+                        </div>
+                        <div class="col-6 mt-1">
+                            <a href="mailto:@iş.İletişim"
+                               class="btn btn-outline-secondary btn-sm w-100">
+                                <i class="fas fa-envelope me-1"></i>
+                                İletişim
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 </div>
+
+<!-- Empty State -->
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="fas fa-briefcase fa-3x text-muted mb-3"></i>
+        <h4 class="text-muted">Henüz iş ilanı bulunmuyor</h4>
+        <p class="text-muted">İlk iş ilanınızı eklemek için aşağıdaki butona tıklayın.</p>
+        <a href="@Url.Action("İlanOluştur")" class="btn btn-success">
+            <i class="fas fa-plus me-1"></i>
+            İlk İlanı Ekle
+        </a>
+    </div>
+}

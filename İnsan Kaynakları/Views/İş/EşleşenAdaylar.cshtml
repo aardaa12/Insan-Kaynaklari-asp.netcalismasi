@@ -1,0 +1,300 @@
+﻿@{
+    ViewData["Title"] = "Uygun Adaylar - " + ViewBag.İş.Başlık;
+    var iş = ViewBag.İş as İnsan_Kaynakları.Models.İş;
+    var adaylar = ViewBag.Adaylar as List<İnsan_Kaynakları.Models.Aday> ?? new List<İnsan_Kaynakları.Models.Aday>();
+}
+
+<div class="row">
+    <div class="col-12">
+        <!-- Job Info Header -->
+        <div class="card mb-4 border-primary">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-1">
+                            <i class="fas fa-briefcase me-2"></i>
+                            @iş.Başlık
+                        </h4>
+                        <p class="mb-0">@iş.Şirket - @iş.Konum</p>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-light text-primary fs-6">@iş.GerekenDeneyim+ yıl deneyim</span><br>
+                        <small>@adaylar.Count aday bulundu</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <strong>Aranan Yetenekler:</strong>
+                        @if (iş.ArananYetenekler.Any())
+                        {
+                            @foreach (var skill in iş.ArananYetenekler)
+                            {
+                                <span class="badge bg-primary me-1">@skill</span>
+                            }
+                        }
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="@Url.Action("İşDetay", new { id = iş.Id })" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye me-1"></i>
+                            İş Detayları
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Matching Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-success text-white">
+                    <div class="card-body">
+                        <h3>@adaylar.Count(a => a.Deneyim >= iş.GerekenDeneyim)</h3>
+                        <small>Deneyim Uygun</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <h3>@adaylar.Count(a => a.Pozisyon.ToLower().Contains(iş.Başlık.ToLower().Split(' ')[0]))</h3>
+                        <small>Pozisyon Eşleşmesi</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-warning text-white">
+                    <div class="card-body">
+                        <h3>@adaylar.Count(a => a.Statü == "Mülakata Çağrıldı" || a.Statü == "Değerlendiriliyor")</h3>
+                        <small>Aktif Süreçte</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-secondary text-white">
+                    <div class="card-body">
+                        <h3>@adaylar.Count(a => a.Statü == "Yeni Başvuru")</h3>
+                        <small>Yeni Başvuru</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Candidate Cards -->
+        @if (adaylar.Any())
+        {
+            <div class="row">
+                @foreach (var aday in adaylar.OrderByDescending(a => CalculateMatchScore(a, iş)))
+                {
+
+                        var matchScore = CalculateMatchScore(aday, iş);
+                        var scoreColor = matchScore >= 80 ? "success" : matchScore >= 60 ? "warning" : "secondary";
+                        var experienceMatch = aday.Deneyim >= iş.GerekenDeneyim;
+                        var positionMatch = aday.Pozisyon.ToLower().Contains(iş.Başlık.ToLower().Split(' ')[0]);
+                    
+                    
+                    <div class="col-lg-6 col-xl-4 mb-4">
+                        <div class="card h-100 @(matchScore >= 80 ? "border-success" : matchScore >= 60 ? "border-warning" : "")">
+                            <!-- Match Score Badge -->
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge bg-@scoreColor fs-6">%@matchScore Uyum</span>
+                            </div>
+                            
+                            <div class="card-body">
+                                <!-- Candidate Info -->
+                                <div class="d-flex align-items-center mb-3">
+                                    <img src="@aday.Fotourl" class="rounded-circle me-3" width="60" height="60" alt="@aday.Ad">
+                                    <div>
+                                        <h5 class="card-title mb-1">@aday.Ad</h5>
+                                        @{
+                                            string statusBadge = aday.Statü switch
+                                            {
+                                                "Yeni Başvuru" => "bg-info",
+                                                "Değerlendiriliyor" => "bg-warning",
+                                                "Mülakata Çağrıldı" => "bg-secondary",
+                                                "İşe Alındı" => "bg-success",
+                                                "Reddedildi" => "bg-danger",
+                                                _ => "bg-secondary"
+                                            };
+                                        }
+                                        <span class="badge @statusBadge">@aday.Statü</span>
+                                    </div>
+                                </div>
+
+                                <!-- Match Indicators -->
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-muted">Pozisyon:</span>
+                                        <div>
+                                            @aday.Pozisyon
+                                            @if (positionMatch)
+                                            {
+                                                <i class="fas fa-check-circle text-success ms-1"></i>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-muted">Deneyim:</span>
+                                        <div>
+                                            @aday.Deneyim yıl 
+                                            @if (experienceMatch)
+                                            {
+                                                <i class="fas fa-check-circle text-success ms-1"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-times-circle text-danger ms-1"></i>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted">Başvuru:</span>
+                                        <span>@aday.UygulamaZamanı.ToString("dd.MM.yyyy")</span>
+                                    </div>
+                                </div>
+
+                                <!-- Skills Comparison -->
+                                <div class="mb-3">
+                                    <small class="text-muted">Yetenekler:</small><br>
+                                    @{
+                                        var candidateSkills = aday.Yetenek.Split(',').Select(s => s.Trim().ToLower()).ToList();
+                                        var jobSkills = iş.ArananYetenekler.Select(s => s.ToLower()).ToList();
+                                        var matchingSkills = candidateSkills.Intersect(jobSkills).Count();
+                                    }
+                                    
+                                    @foreach (var skill in aday.Yetenek.Split(',').Take(3))
+                                    {
+                                        var skillTrimmed = skill.Trim();
+                                        var isMatching = iş.ArananYetenekler.Any(js => js.ToLower().Contains(skillTrimmed.ToLower()));
+                                        <span class="badge @(isMatching ? "bg-success" : "bg-light text-dark") me-1 mb-1">
+                                            @skillTrimmed
+                                            @if (isMatching)
+                                            {
+                                                <i class="fas fa-check ms-1"></i>
+                                            }
+                                        </span>
+                                    }
+                                    @if (aday.Yetenek.Split(',').Length > 3)
+                                    {
+                                        <span class="badge bg-secondary">+@(aday.Yetenek.Split(',').Length - 3)</span>
+                                    }
+                                    <br>
+                                    <small class="text-success">@matchingSkills/@iş.ArananYetenekler.Count yetenek eşleşiyor</small>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="card-footer">
+                                <div class="row g-1">
+                                    <div class="col-6">
+                                        <a href="@Url.Action("Detaylar", "Aday", new { id = aday.Id })" 
+                                           class="btn btn-primary btn-sm w-100">
+                                            <i class="fas fa-user me-1"></i>
+                                            Profil
+                                        </a>
+                                    </div>
+                                    <div class="col-6">
+                                        <a href="mailto:@aday.Mail?subject=@Uri.EscapeDataString(iş.Başlık + " Pozisyonu")" 
+                                           class="btn btn-success btn-sm w-100">
+                                            <i class="fas fa-envelope me-1"></i>
+                                            İletişim
+                                        </a>
+                                    </div>
+                                    <div class="col-12 mt-1">
+                                        @{
+                                            // Check if candidate already applied to this job
+                                            // We'll need to pass this info from controller
+                                            var hasApplied = ViewBag.AppliedCandidates != null && 
+                                                            ((List<int>)ViewBag.AppliedCandidates).Contains(aday.Id);
+                                        }
+                                        @if (hasApplied)
+                                        {
+                                            <button class="btn btn-secondary btn-sm w-100" disabled>
+                                                <i class="fas fa-check me-1"></i>
+                                                Zaten Başvurdu
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <form method="post" action="@Url.Action("AdayBaşvur")" class="d-inline w-100">
+                                                <input type="hidden" name="adayId" value="@aday.Id" />
+                                                <input type="hidden" name="işId" value="@iş.Id" />
+                                                <input type="hidden" name="not" value="Sistem tarafından otomatik eşleştirme ile başvurdu. Uyum skoru: %@matchScore" />
+                                                <button type="submit" class="btn btn-warning btn-sm w-100"
+                                                        onclick="return confirm('Bu adayı @iş.Başlık pozisyonuna başvurtmak istediğinizden emin misiniz?')">
+                                                    <i class="fas fa-plus me-1"></i>
+                                                    İşe Başvurt
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">Bu iş için uygun aday bulunamadı</h4>
+                <p class="text-muted">Kriterleri gevşeterek tekrar arama yapabilir veya yeni adaylar ekleyebilirsiniz.</p>
+                <a href="@Url.Action("Oluştur", "Aday")" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>
+                    Yeni Aday Ekle
+                </a>
+            </div>
+        }
+
+        <!-- Back Button -->
+        <div class="text-center mt-4">
+            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>
+                İş İlanlarına Dön
+            </a>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public int CalculateMatchScore(İnsan_Kaynakları.Models.Aday aday, İnsan_Kaynakları.Models.İş iş)
+    {
+        int score = 0;
+        
+        // Experience match (30 points)
+        if (aday.Deneyim >= iş.GerekenDeneyim)
+            score += 30;
+        else if (aday.Deneyim >= iş.GerekenDeneyim - 1)
+            score += 20;
+        else if (aday.Deneyim >= iş.GerekenDeneyim - 2)
+            score += 10;
+            
+        // Position match (25 points)
+        if (aday.Pozisyon.ToLower().Contains(iş.Başlık.ToLower().Split(' ')[0]))
+            score += 25;
+        else if (iş.Başlık.ToLower().Contains(aday.Pozisyon.ToLower().Split(' ')[0]))
+            score += 15;
+            
+        // Skills match (35 points)
+        var candidateSkills = aday.Yetenek.Split(',').Select(s => s.Trim().ToLower()).ToList();
+        var jobSkills = iş.ArananYetenekler.Select(s => s.ToLower()).ToList();
+        var matchingSkills = candidateSkills.Intersect(jobSkills).Count();
+        
+        if (jobSkills.Any())
+        {
+            var skillMatchPercentage = (double)matchingSkills / jobSkills.Count();
+            score += (int)(skillMatchPercentage * 35);
+        }
+        
+        // Status bonus (10 points)
+        if (aday.Statü == "Yeni Başvuru" || aday.Statü == "Değerlendiriliyor")
+            score += 10;
+        else if (aday.Statü == "Mülakata Çağrıldı")
+            score += 5;
+            
+        return Math.Min(score, 100); // Cap at 100%
+    }
+}

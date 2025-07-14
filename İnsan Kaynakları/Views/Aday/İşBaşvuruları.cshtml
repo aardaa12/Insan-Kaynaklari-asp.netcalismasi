@@ -1,0 +1,300 @@
+﻿@{
+    ViewData["Title"] = "Başvurular - " + ViewBag.İş.Başlık;
+    var iş = ViewBag.İş as İnsan_Kaynakları.Models.İş;
+    var başvurular = ViewBag.Başvurular as List<İnsan_Kaynakları.Models.Başvuru> ?? new List<İnsan_Kaynakları.Models.Başvuru>();
+}
+
+<div class="row">
+    <div class="col-12">
+        <!-- Job Header -->
+        <div class="card mb-4 border-primary">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-1">
+                            <i class="fas fa-briefcase me-2"></i>
+                            @iş.Başlık - Başvurular
+                        </h4>
+                        <p class="mb-0">@iş.Şirket - @iş.Konum</p>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-light text-primary fs-6">@başvurular.Count toplam başvuru</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-2">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body p-3">
+                        <h4>@başvurular.Count(b => b.Durum == "Yeni Başvuru")</h4>
+                        <small>Yeni</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-center bg-warning text-white">
+                    <div class="card-body p-3">
+                        <h4>@başvurular.Count(b => b.Durum == "Değerlendiriliyor")</h4>
+                        <small>Değerlendiriliyor</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-center bg-secondary text-white">
+                    <div class="card-body p-3">
+                        <h4>@başvurular.Count(b => b.Durum == "Mülakata Çağrıldı")</h4>
+                        <small>Mülakat</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-center bg-success text-white">
+                    <div class="card-body p-3">
+                        <h4>@başvurular.Count(b => b.Durum == "Kabul Edildi")</h4>
+                        <small>Kabul</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-center bg-danger text-white">
+                    <div class="card-body p-3">
+                        <h4>@başvurular.Count(b => b.Durum == "Reddedildi")</h4>
+                        <small>Red</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-center bg-light text-dark">
+                    <div class="card-body p-3">
+                        <h4>@(başvurular.Any() ? başvurular.Average(b => b.Puan).ToString("F1") : "0")</h4>
+                        <small>Ort. Puan</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Applications List -->
+        @if (başvurular.Any())
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        Başvuru Listesi
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Aday</th>
+                                    <th>Başvuru Tarihi</th>
+                                    <th>Durum</th>
+                                    <th>Puan</th>
+                                    <th>Mülakat</th>
+                                    <th>Not</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var başvuru in başvurular.OrderByDescending(b => b.BaşvuruTarihi))
+                                {
+                                    <tr>
+                                        <!-- Candidate Info -->
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="@başvuru.Aday?.Fotourl" class="rounded-circle me-2" width="40" height="40" alt="@başvuru.Aday?.Ad">
+                                                <div>
+                                                    <strong>@başvuru.Aday?.Ad</strong><br>
+                                                    <small class="text-muted">@başvuru.Aday?.Pozisyon</small>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <!-- Application Date -->
+                                        <td>
+                                            <span>@başvuru.BaşvuruTarihi.ToString("dd.MM.yyyy")</span><br>
+                                            <small class="text-muted">@başvuru.BaşvuruTarihi.ToString("HH:mm")</small>
+                                        </td>
+
+                                        <!-- Status -->
+                                        <td>
+                                            @{
+                                                string statusBadge = başvuru.Durum switch
+                                                {
+                                                    "Yeni Başvuru" => "bg-info",
+                                                    "Değerlendiriliyor" => "bg-warning",
+                                                    "Mülakata Çağrıldı" => "bg-secondary",
+                                                    "Kabul Edildi" => "bg-success",
+                                                    "Reddedildi" => "bg-danger",
+                                                    _ => "bg-secondary"
+                                                };
+                                            }
+                                            <span class="badge @statusBadge">@başvuru.Durum</span>
+                                        </td>
+
+                                        <!-- Score -->
+                                        <td>
+                                            @if (başvuru.Puan > 0)
+                                            {
+                                                <div class="d-flex align-items-center">
+                                                    <span class="me-2">@başvuru.Puan/5</span>
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        <i class="fas fa-star @(i <= başvuru.Puan ? "text-warning" : "text-muted")"></i>
+                                                    }
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Henüz puanlanmamış</span>
+                                            }
+                                        </td>
+
+                                        <!-- Interview -->
+                                        <td>
+                                            @if (başvuru.MülakatTarihi.HasValue)
+                                            {
+                                                <span>@başvuru.MülakatTarihi.Value.ToString("dd.MM.yyyy")</span>
+                                    
+                                                <br>
+                                                <small class="text-muted">@başvuru.MülakatTarihi.Value.ToString("HH:mm")</small>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Planlanmamış</span>
+                                            }
+                                        </td>
+
+                                        <!-- Notes -->
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(başvuru.Not))
+                                            {
+                                                <span title="@başvuru.Not">
+                                                    @(başvuru.Not.Length > 30 ? başvuru.Not.Substring(0, 30) + "..." : başvuru.Not)
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Not yok</span>
+                                            }
+                                        </td>
+
+                                        <!-- Actions -->
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="@Url.Action("Detaylar", "Aday", new { id = başvuru.AdayId })"
+                                                   class="btn btn-outline-primary" title="Aday Profili">
+                                                    <i class="fas fa-user"></i>
+                                                </a>
+                                                <button class="btn btn-outline-warning"
+                                                        onclick="editApplication(@başvuru.Id, '@başvuru.Durum', '@başvuru.Not', @başvuru.Puan)"
+                                                        title="Düzenle">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <a href="mailto:@başvuru.Aday?.Mail"
+                                                   class="btn btn-outline-success" title="Email Gönder">
+                                                    <i class="fas fa-envelope"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">Henüz başvuru yok</h4>
+                <p class="text-muted">Bu iş ilanı için henüz başvuru bulunmuyor.</p>
+                <a href="@Url.Action("EşleşenAdaylar", new { id = iş.Id })" class="btn btn-primary">
+                    <i class="fas fa-search me-1"></i>
+                    Uygun Adayları Bul
+                </a>
+            </div>
+        }
+
+        <!-- Back Button -->
+        <div class="text-center mt-4">
+            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>
+                İş İlanlarına Dön
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Application Modal -->
+<div class="modal fade" id="editApplicationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="@Url.Action("BaşvuruDurumGüncelle")">
+                <div class="modal-header">
+                    <h5 class="modal-title">Başvuru Durumunu Güncelle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editBaşvuruId" name="başvuruId" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Durum</label>
+                        <select id="editDurum" name="durum" class="form-select" required>
+                            <option value="Yeni Başvuru">Yeni Başvuru</option>
+                            <option value="Değerlendiriliyor">Değerlendiriliyor</option>
+                            <option value="Mülakata Çağrıldı">Mülakata Çağrıldı</option>
+                            <option value="Kabul Edildi">Kabul Edildi</option>
+                            <option value="Reddedildi">Reddedildi</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Puan (1-5)</label>
+                        <select id="editPuan" name="puan" class="form-select">
+                            <option value="0">Puanlanmamış</option>
+                            <option value="1">1 - Çok Zayıf</option>
+                            <option value="2">2 - Zayıf</option>
+                            <option value="3">3 - Orta</option>
+                            <option value="4">4 - İyi</option>
+                            <option value="5">5 - Mükemmel</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Mülakat Tarihi</label>
+                        <input type="datetime-local" id="editMülakatTarihi" name="mülakatTarihi" class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Notlar</label>
+                        <textarea id="editNot" name="not" class="form-control" rows="3" placeholder="Değerlendirme notları..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">Güncelle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function editApplication(id, durum, not, puan) {
+        document.getElementById('editBaşvuruId').value = id;
+        document.getElementById('editDurum').value = durum;
+        document.getElementById('editNot').value = not || '';
+        document.getElementById('editPuan').value = puan || 0;
+
+        var modal = new bootstrap.Modal(document.getElementById('editApplicationModal'));
+        modal.show();
+    }
+</script>
